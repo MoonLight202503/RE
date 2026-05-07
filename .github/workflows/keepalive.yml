@@ -1,0 +1,23 @@
+name: Supabase Keepalive
+
+on:
+  schedule:
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "apikey: ${{ secrets.SUPABASE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_KEY }}" \
+            "https://fobrsbhdbyysiwkimtov.supabase.co/rest/v1/sensor_data?limit=1")
+          echo "응답 코드: $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "경고: 응답 코드가 200이 아닙니다"
+            exit 1
+          fi
+          echo "Supabase 정상 응답 확인!"
